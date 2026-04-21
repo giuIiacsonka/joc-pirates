@@ -82,7 +82,7 @@
 <body>
     <div id="startScreen">
         <h1> Island Adventure</h1>
-        <p>Arriba a casa abans de quedar-te sense energia o menjar!</p>
+        <p>Arriba a casa abans de quedar-te sense energia o menjar! Per derrotar el kraken necessites força 20</p>
         <button autofocus onclick="startGame(); startTimer();">Jugar</button>
     </div>
 
@@ -215,6 +215,11 @@
                         endGame();
                         return;
                     }
+                    if (gameObjects[vaixellFila][vaixellColumna] === KRAKEN) {
+                        lluitarBoss();
+                        render();
+                        return;
+                    }
                     gameObjects[vaixellFila][vaixellColumna] = VAIXELL;
                     menjar--;
                 }
@@ -225,6 +230,11 @@
                     vaixellFila++;
                     if (gameObjects[vaixellFila][vaixellColumna] === MONSTRE) {
                         endGame();
+                        return;
+                    }
+                    if (gameObjects[vaixellFila][vaixellColumna] === KRAKEN) {
+                        lluitarBoss();
+                        render();
                         return;
                     }
                     gameObjects[vaixellFila][vaixellColumna] = VAIXELL;
@@ -239,6 +249,11 @@
                         endGame();
                         return;
                     }
+                    if (gameObjects[vaixellFila][vaixellColumna] === KRAKEN) {
+                        lluitarBoss();
+                        render();
+                        return;
+                    }
                     gameObjects[vaixellFila][vaixellColumna] = VAIXELL;
                     menjar--;
                 }
@@ -249,6 +264,11 @@
                     vaixellColumna++;
                     if (gameObjects[vaixellFila][vaixellColumna] === MONSTRE) {
                         endGame();
+                        return;
+                    }
+                    if (gameObjects[vaixellFila][vaixellColumna] === KRAKEN) {
+                        lluitarBoss();
+                        render();
                         return;
                     }
                     gameObjects[vaixellFila][vaixellColumna] = VAIXELL;
@@ -262,6 +282,10 @@
                 if (vaixellFila > 0) {
                     gameObjects[vaixellFila][vaixellColumna] = 0;
                     vaixellFila--;
+                    if (vaixellFila === 4 && vaixellColumna === 4 || vaixellFila === 4 && vaixellColumna === 5 || vaixellFila === 5 && vaixellColumna === 4 || vaixellFila === 5 && vaixellColumna === 5) {
+                        lluitarBoss();
+                        return;
+                    }
                     gameObjects[vaixellFila][vaixellColumna] = VAIXELL;
                     menjar--;
                 }
@@ -270,6 +294,10 @@
                 if (vaixellFila < FILES - 1) {
                     gameObjects[vaixellFila][vaixellColumna] = 0;
                     vaixellFila++;
+                    if (vaixellFila === 4 && vaixellColumna === 4 || vaixellFila === 4 && vaixellColumna === 5 || vaixellFila === 5 && vaixellColumna === 4 || vaixellFila === 5 && vaixellColumna === 5) {
+                        lluitarBoss();
+                        return;
+                    }
                     gameObjects[vaixellFila][vaixellColumna] = VAIXELL;
                     menjar--;
                 }
@@ -278,6 +306,10 @@
                 if (vaixellColumna > 0) {
                     gameObjects[vaixellFila][vaixellColumna] = 0;
                     vaixellColumna--;
+                    if (vaixellFila === 4 && vaixellColumna === 4 || vaixellFila === 4 && vaixellColumna === 5 || vaixellFila === 5 && vaixellColumna === 4 || vaixellFila === 5 && vaixellColumna === 5) {
+                        lluitarBoss();
+                        return;
+                    }
                     gameObjects[vaixellFila][vaixellColumna] = VAIXELL;
                     menjar--;
                 }
@@ -286,16 +318,14 @@
                 if (vaixellColumna < COLUMNES - 1) {
                     gameObjects[vaixellFila][vaixellColumna] = 0;
                     vaixellColumna++;
+                    if (vaixellFila === 4 && vaixellColumna === 4 || vaixellFila === 4 && vaixellColumna === 5 || vaixellFila === 5 && vaixellColumna === 4 || vaixellFila === 5 && vaixellColumna === 5) {
+                        lluitarBoss();
+                        return;
+                    }
                     gameObjects[vaixellFila][vaixellColumna] = VAIXELL;
                     menjar--;
                 }
                 break;
-        }
-
-        if (gameObjects[vaixellFila][vaixellColumna] === KRAKEN && !bossMort) {
-            lluitarBoss();
-            render();
-            return;
         }
 
         switch (mapa[vaixellFila][vaixellColumna]) {
@@ -317,6 +347,7 @@
                 break;
         }
         moureMonstre();
+        mourePirates();
         if (gameObjects[vaixellFila][vaixellColumna] === MONSTRE) {
             endGame();
         }
@@ -372,6 +403,38 @@
         }
     }
 
+    function mourePirates() {
+        for (let p of piratesQueEsMouen) {
+
+            let direccions = [
+                [-1, 0],
+                [1, 0],
+                [0, -1],
+                [0, 1]
+            ];
+
+            let r = Math.floor(Math.random() * direccions.length);
+            let novaFila = p.fila + direccions[r][0];
+            let novaColumna = p.columna + direccions[r][1];
+
+            if (
+                novaFila >= 0 &&
+                novaFila < FILES &&
+                novaColumna >= 0 &&
+                novaColumna < COLUMNES &&
+                mapa[novaFila][novaColumna] !== CASA &&
+                mapa[novaFila][novaColumna] !== ISLAND
+            ) {
+                p.fila = novaFila;
+                p.columna = novaColumna;
+            }
+
+            if (p.fila === vaixellFila && p.columna === vaixellColumna) {
+                lluitar();
+            }
+        }
+    }
+
     function lluitar() {
         let forçaVaixell = Math.ceil((menjar + energia) / 2);
         let forçaPirata = Math.ceil(Math.random() * forçaVaixell * 2);
@@ -392,12 +455,33 @@
     function lluitarBoss() {
         let forçaJugador = energia + menjar;
         let forçaBoss = 20;
+
         if (forçaJugador >= forçaBoss) {
             bossMort = true;
+            // esborra el kraken del mapa
             gameObjects[4][4] = 0;
-            gameMessage = "Has derrotat el Kraken!";
+            gameObjects[4][5] = 0;
+            gameObjects[5][4] = 0;
+            gameObjects[5][5] = 0;
+
+            // posa el vaixell a la posició del combat
+            gameObjects[vaixellFila][vaixellColumna] = VAIXELL;
             experience += 10;
-            escena.innerHTML = "images/boss mort.gif";
+            gameMessage = "Has derrotat el Kraken!";
+
+            render();
+
+            // GIF després del render
+            let img = document.createElement("img");
+            img.src = "images/boss_mort.gif";
+            img.className = "cell";
+            img.style.left = (4 * MIDA) + "px";
+            img.style.top = (4 * MIDA) + "px";
+            img.style.width = "128px";
+            img.style.height = "128px";
+            img.style.zIndex = "20";
+            escena.appendChild(img);
+
         } else {
             gameMessage = "El Kraken t'ha destruït!";
             endGame();
@@ -496,9 +580,6 @@
                         cell.src = "images/monster.png";
                         break;
                     case KRAKEN:
-                        cell.src = "images/kraken.png";
-                        cell.style.width = "128px";
-                        cell.style.height = "128px";
                         cell.style.zIndex = "5";
                         break;
                 }
@@ -507,10 +588,33 @@
                 cell.style.left = columna * MIDA + "px";
             }
         }
+        if (nivell === 3) {
+            for (let p of piratesQueEsMouen) {
+                let pirate = document.createElement("img");
+                pirate.src = "images/hello_kitty_pirate.png";
+                pirate.className = "cell";
+                pirate.style.left = (p.columna * MIDA) + "px";
+                pirate.style.top = (p.fila * MIDA) + "px";
+                pirate.style.zIndex = "4";
+                escena.appendChild(pirate);
+            }
+            if (nivell === 3 && !bossMort) {
+                let kraken = document.createElement("img");
+                kraken.src = "images/kraken.png";
+                kraken.className = "cell";
+                kraken.style.left = (4 * MIDA) + "px";
+                kraken.style.top = (4 * MIDA) + "px";
+                kraken.style.width = "128px";
+                kraken.style.height = "128px";
+                kraken.style.zIndex = "5";
+                escena.appendChild(kraken);
+            }
+        }
         // Mostra missatge 
+        let força = menjar + energia
         output.innerHTML = gameMessage;
         //Mostra el menjar, energia i experiencia del jugador
-        output.innerHTML += "<br>⚡ Energia: " + energia + " | 🍊 Menjar: " + menjar + " | ⭐ Experiència: " + experience;
+        output.innerHTML += "<br>⚡ Energia: " + energia + " | 🍊 Menjar: " + menjar + " | ⭐ Experiència: " + experience + " | 💪 Força: " + força;
         let puntuacio = menjar + energia + experience;
         if (puntuacio > highscore) {
             highscore = puntuacio;
@@ -600,6 +704,10 @@
             gameObjects = crearMatriu(10, 10);
             gameObjects[9][0] = VAIXELL;
             gameObjects[4][4] = KRAKEN;
+            gameObjects[4][5] = KRAKEN;
+            gameObjects[5][4] = KRAKEN;
+            gameObjects[5][5] = KRAKEN;
+
             vaixellFila = 9;
             vaixellColumna = 0;
             escena.style.height = "641px";
@@ -607,6 +715,11 @@
             bossMort = false;
             gameMessage = "Has de matar el boss final"
         }
+        piratesQueEsMouen = [
+            { fila: 1, columna: 1 },
+            { fila: 3, columna: 7 },
+            { fila: 8, columna: 5 }
+        ];
         render();
     }
 
@@ -639,5 +752,4 @@
         const seconds = String(time % 60).padStart(2, '0');
         document.getElementById("timer").textContent = `${minutes}:${seconds}`;
     }
-
 </script>
