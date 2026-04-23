@@ -4,10 +4,8 @@
     #escena {
         position: relative;
         width: 255px;
-        height: 255px
-            /*384px*/
-        ;
-        background-image: url("images/background2.png");
+        height: 255px;
+        background-image: url("images/background_mines.png");
         margin: 0 auto;
         border: 4px solid #ffdc9a;
         border-radius: 12px;
@@ -73,16 +71,22 @@
     }
 
     #puntuacio {
-        text-shadow: 0 0 6px #ffd64f;
+        text-shadow: 0 0 10px #ffbb00;
         color: white;
         font-weight: bold;
+        text-align: center;
+    }
+
+    #taula1 {
+        width: 100%;
     }
 </style>
 
 <body>
     <div id="startScreen">
         <h1> Island Adventure</h1>
-        <p>Arriba a casa abans de quedar-te sense energia o menjar! Per derrotar el kraken necessites força 20</p>
+        <p>Arriba a casa abans de quedar-te sense energia o menjar! Per derrotar el Kraken necessites tenir 20 de força
+        </p>
         <button autofocus onclick="startGame(); startTimer();">Jugar</button>
     </div>
 
@@ -91,11 +95,13 @@
         <p id="finalMessage"></p>
         <button onclick="location.reload()">Tornar a jugar</button>
     </div>
+    <div style="background-color: white;border-radius: 12px;border: 1px solid orange;width:26%">
+        <p id="puntuacio"></p>
+    </div>
     <div id="contingut">
-        <div id="escena"></div>
         <p id="output"></p>
         <p id="controls"></p>
-        <p id="puntuacio"></p>
+        <div id="escena"></div>
     </div>
     <div id="timer"></div>
     <table id="estil-taula" style="margin-left: auto;">
@@ -121,6 +127,13 @@
     </table>
 </body>
 <script>
+
+    let imgIsland = "images/island2.png";
+    let imgPirata = "images/hello_kitty_pirate.png";
+    let imgCasa = "images/home.png";
+    let imgVaixell = "images/ship2.png";
+    let imgMonstre = "images/monster.png";
+    let imgFons = "images/background2.png";
     let piratesQueEsMouen = [];
     let gameState = "start"; // start, playing, gameover
     let escena = document.querySelector("#escena");
@@ -549,7 +562,6 @@
     function render() {
         //Esborrem el que hi havia anteriorment
         escena.innerHTML = "";
-
         //Render the game by looping through the mapa arrays
         for (let fila = 0; fila < FILES; fila++) {
             for (let columna = 0; columna < COLUMNES; columna++) {
@@ -557,27 +569,26 @@
                 //Set its CSS class to "cell"
                 cell.setAttribute("class", "cell");
                 escena.appendChild(cell);
-
                 switch (mapa[fila][columna]) {
                     case AIGUA:
                         cell.src = "images/water.png";
                         break;
                     case ISLAND:
-                        cell.src = "images/island2.png";
+                        cell.src = imgIsland;
                         break;
                     case PIRATA:
-                        cell.src = "images/hello_kitty_pirate.png";
+                        cell.src = imgPirata;
                         break;
                     case CASA:
-                        cell.src = "images/home.png";
+                        cell.src = imgCasa;
                         break;
                 }
                 switch (gameObjects[fila][columna]) {
                     case VAIXELL:
-                        cell.src = "images/ship2.png";
+                        cell.src = imgVaixell;
                         break;
                     case MONSTRE:
-                        cell.src = "images/monster.png";
+                        cell.src = imgMonstre;
                         break;
                     case KRAKEN:
                         cell.style.zIndex = "5";
@@ -654,6 +665,10 @@
             FILES = mapa.length;
             COLUMNES = mapa[0].length;
             gameObjects = crearMatriu(FILES, COLUMNES);
+            imgFons = "images/background_mines.png";
+            imgMonstre = "images/bat_mines.png";
+            imgIsland = "images/chest_mines.png";
+            imgCasa = "images/ladder_mines.png";
 
             // vaixell
             gameObjects[3][0] = VAIXELL;
@@ -663,13 +678,11 @@
             monstreFila = 0;
             monstreColumna = 2;
             gameObjects[0][2] = MONSTRE;
-
         }
 
         else if (nivell === 2) {
             FILES = 6;
             COLUMNES = 6;
-
             mapa = [
                 [0, 2, 0, 0, 0, 3],
                 [0, 0, 0, 1, 0, 2],
@@ -678,7 +691,6 @@
                 [0, 2, 0, 0, 0, 0],
                 [0, 0, 0, 0, 0, 0]
             ];
-
             gameObjects = crearMatriu(6, 6);
             gameObjects[5][0] = VAIXELL;
             escena.style.height = "384px";
@@ -688,6 +700,12 @@
             monstreFila = 0;
             monstreColumna = 1;
             gameObjects[0][1] = MONSTRE;
+
+            imgFons = "images/background_forest.png";
+            imgCasa = "images/ship2.png";
+            imgMonstre = "images/jaguar_forest.png"
+            imgPirata = "images/snake_forest.png"
+            imgIsland = "images/food_forest.png"
         }
 
         else if (nivell === 3) {
@@ -700,6 +718,11 @@
             mapa[2][2] = ISLAND;
             mapa[5][6] = ISLAND;
             mapa[7][3] = ISLAND;
+            imgFons = "images/background.png"
+            imgCasa = "images/home.png";
+            imgMonstre = "images/monster.png";
+            imgIsland = "images/island2.png"
+            imgPirata = "hello_kitty_pirate.png"
 
             gameObjects = crearMatriu(10, 10);
             gameObjects[9][0] = VAIXELL;
@@ -720,6 +743,7 @@
             { fila: 3, columna: 7 },
             { fila: 8, columna: 5 }
         ];
+        escena.style.backgroundImage = "url('" + imgFons + "')";
         render();
     }
 
