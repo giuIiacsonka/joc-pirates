@@ -1,12 +1,19 @@
 <!DOCTYPE html>
-<title>Island Adventure</title>
+<title>Illes Salvatges</title>
 <style>
+    #infoNivell {
+        background: white;
+        border-radius: 12px;
+        padding: 15px;
+        margin-top: 10px;
+        border: 1px solid orange;
+    }
+
     #escena {
         position: relative;
         width: 255px;
         height: 255px;
         background-image: url("images/background_mines.png");
-        margin: 0 auto;
         border: 4px solid #ffdc9a;
         border-radius: 12px;
         background-size: cover;
@@ -30,8 +37,10 @@
     #contingut {
         text-align: center;
         display: block;
-        margin: 0 auto;
-        width: fit-content;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+
     }
 
     .cell {
@@ -56,13 +65,15 @@
         left: 0;
         width: 100%;
         height: 100%;
-        background-color: rgba(255, 227, 192, 0.85);
+        background-color: rgba(255, 227, 192, 1);
+        background-image: url(images/fons.gif);
         display: flex;
+        background-size: cover;
         flex-direction: column;
         justify-content: center;
         align-items: center;
         z-index: 10;
-        color: #ffa44f;
+        color: #ffffff;
     }
 
     button {
@@ -117,9 +128,7 @@
         min-height: 50px;
         border-left: 5px solid #ffc156;
         width: 100%;
-        /* 🔥 ocupa tot el td */
         box-sizing: border-box;
-        /* evita que el padding el faci sortir */
     }
 
     #timer {
@@ -135,42 +144,70 @@
 
 <body>
     <div id="startScreen">
-        <h1> Island Adventure</h1>
-        <p>Arriba a casa abans de quedar-te sense energia o menjar! Per derrotar el Kraken necessites tenir 20 de força
-        </p>
-        <button autofocus onclick="startGame(); startTimer();">Jugar</button>
+        <div
+            style="background-color: rgba(255, 164, 79, 0.5); height: 50%;align-items: center;padding: 15px; border-radius: 20px;width:55%">
+            <h1>Illes Salvatges</h1>
+            <p>Arriba a casa abans de quedar-te sense energia o menjar!
+            </p>
+            <input autofocus id="usernameInput" placeholder="Posa't un nom" /><br><br>
+            <button onclick="startGame(); startTimer();">Jugar</button>
+        </div>
     </div>
-
     <div id="gameOverScreen" style="display:none;">
-        <h1>Fi del joc</h1>
-        <p id="finalMessage"></p>
-        <button onclick="location.reload()">Tornar a jugar</button>
+        <div
+            style="background-color: rgba(255, 164, 79, 0.5); height: 50%;align-items: center;padding: 15px; border-radius: 20px;width:55%">
+            <h1>Fi del joc!</h1>
+            <p id="finalMessage"></p>
+            <button onclick="location.reload()">Tornar a jugar</button>
+        </div>
     </div>
     <div id="levelScreen" style="display:none;">
-        <h1>🎉 Has passat de nivell!</h1>
-        <p>Vols continuar l'aventura?</p>
-        <button onclick="continuarNivell()">Continuar</button>
+        <div
+            style="background-color: rgba(255, 164, 79, 0.5); height: 50%;align-items: center;padding: 15px; border-radius: 20px;width:55%">
+            <h1>🎉 Has passat de nivell!</h1>
+            <p>Vols continuar l'aventura?</p>
+            <button onclick="continuarNivell()">Continuar</button>
+        </div>
     </div>
     <table style="width: 100%;">
         <tr>
-            <td style="width: 26%;">
+            <td style="width: 26%;padding-left: 5px;">
                 <div style="background-color: white;border-radius: 12px;border: 1px solid orange;width:80%">
                     <p id="puntuacio"></p>
                 </div>
             </td>
-            <td style="text-align: center; vertical-align: middle;">
+            <td style="text-align: center; vertical-align: middle;width: 50%;">
                 <p id="output"></p>
             </td>
             <td>
                 <div id="timer"></div>
             </td>
         </tr>
+        <tr>
+            <td style="padding-left: 5px">
+                <table id="rankingTable"
+                    style="background-color: #f0fdff;border: 1px solid orange; border-collapse: collapse;width: 50%;">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Nom</th>
+                            <th>Temps</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                </table>
+            </td>
+            <td>
+                <div id="contingut">
+                    <div id="escena"></div>
+                </div>
+            </td>
+            <td>
+                <div id="infoNivell">instruccions</div>
+            </td>
+        </tr>
     </table>
-    <div id="contingut">
-        <div id="escena"></div>
-        <p id="nose"></p>
-    </div>
-
     <table id="estil-taula" style="margin-left: auto;">
         <th id="estil-taula">
             Controls
@@ -207,12 +244,13 @@
     let puntuacioMessage = document.querySelector("#puntuacio");
     let highscore = Number(localStorage.getItem("highscore")) || 0;
     let nivell = 1;
+    let username = "";
 
     //listener d'events teclat
     window.addEventListener("keydown", keydownHandler, false);
     window.addEventListener("keydown", keyHandler, false);
 
-    //mapa joc
+    //mapa joc, separem el monstre i el jugador a gameObjects 
     let mapa =
         [
             [0, 2, 0, 0, 0, 3],
@@ -232,8 +270,7 @@
             [0, 0, 0, 0, 0, 0],
             [4, 0, 0, 0, 0, 0]
         ];
-
-    // Codi mapa
+    // Codi mapa on se situen cada objecte
     let AIGUA = 0;
     let ISLAND = 1;
     let PIRATA = 2;
@@ -259,29 +296,11 @@
     let FILES = mapa.length;
     let COLUMNES = mapa[0].length;
 
-    //An automatic way of setting the vaixell's start position
-    let vaixellFila;
-    let vaixellColumna;
-    let monstreFila;
-    let monstreColumna;
     //Variables del joc
-    let menjar = 9;
-    let energia = 20;
+    let menjar = 15;
+    let energia = 15;
     let experience = 0;
     let gameMessage = "Utilitza les fletxes o W,A,S,D per arribar al castell."
-
-    for (let fila = 0; fila < FILES; fila++) {
-        for (let columna = 0; columna < COLUMNES; columna++) {
-            if (gameObjects[fila][columna] === VAIXELL) {
-                vaixellFila = fila;
-                vaixellColumna = columna;
-            }
-            if (gameObjects[fila][columna] === MONSTRE) {
-                monstreFila = fila;
-                monstreColumna = columna;
-            }
-        }
-    }
 
     function keydownHandler(event) {
         if (gameState !== "playing") return;
@@ -409,12 +428,11 @@
 
         switch (mapa[vaixellFila][vaixellColumna]) {
             case AIGUA:
-                gameMessage = "Navegues pel mar"
+                gameMessage = ""
                 break;
             case PIRATA:
                 lluitar();
                 mapa[vaixellFila][vaixellColumna] = AIGUA; // El pirata desapareix i es torna aigua
-                //gameMessage = "Has passat per sobre del pirata!";
                 break;
             case ISLAND:
                 trade();
@@ -422,7 +440,10 @@
             case CASA:
                 if (nivell === 3 && !bossMort) {
                     gameMessage = "No pots escapar! Derrota el Kraken!";
-                } else {
+                } if (nivell === 3 && bossMort) {
+                    endGame(); // 👈 AIXÒ és el que faltava
+                }
+                else {
                     nextLevel();
                 }
                 break;
@@ -444,7 +465,6 @@
         let LEFT = 3;
         let RIGHT = 4;
         let validDirections = [];
-        let direction = undefined;
         if (monstreFila > 0) {
             let thingAbove = mapa[monstreFila - 1][monstreColumna];
             if (thingAbove === AIGUA) validDirections.push(UP);
@@ -485,12 +505,21 @@
     }
 
     function mourePirates() {
-        for (let i = piratesQueEsMouen.length - 1; i >= 0; i--) {
-            let p = piratesQueEsMouen[i];
-            // Si el pirata cau a la teva posició
+        for (let p of piratesQueEsMouen) {
+            // possibles direccions
+            let moviments = [];
+
+            if (p.fila > 0) moviments.push({ df: -1, dc: 0 });
+            if (p.fila < FILES - 1) moviments.push({ df: 1, dc: 0 });
+            if (p.columna > 0) moviments.push({ df: 0, dc: -1 });
+            if (p.columna < COLUMNES - 1) moviments.push({ df: 0, dc: 1 });
+
+            let move = moviments[Math.floor(Math.random() * moviments.length)];
+
+            p.fila += move.df;
+            p.columna += move.dc;
             if (p.fila === vaixellFila && p.columna === vaixellColumna) {
                 lluitar();
-                piratesQueEsMouen.splice(i, 1); // L'eliminem de la llista perquè no torni a atacar
             }
         }
     }
@@ -499,17 +528,17 @@
         let forçaVaixell = Math.ceil((menjar + energia) / 2);
         let forçaPirata = Math.ceil(Math.random() * forçaVaixell * 2)
         if (forçaPirata > forçaVaixell) {
-            let stolenEnergia = Math.round(forçaPirata / 2);
-            energia -= stolenEnergia;
+            let stolenEnergia = Math.floor(Math.random() * 12) + 1;
+            energia = Math.max(0, energia - stolenEnergia);
             experience += 1;
-            gameMessage = "Lluites i perds " + stolenEnergia + " peça energia" + " Força vaixell: " + forçaVaixell + " Força del pirata: " + forçaPirata;
+            gameMessage = "Lluites i perds " + stolenEnergia + " d'energia." + " Força del jugador: " + forçaVaixell + " Força de la criatura: " + forçaPirata;
             return false;
         }
         else {
             let pirateEnergia = Math.round(forçaPirata / 2);
             energia += pirateEnergia;
             experience += 2;
-            gameMessage = "Lluites i guanyes " + pirateEnergia + " peça energia" + " Força vaixell: " + forçaVaixell + " Força del pirata: " + forçaPirata;
+            gameMessage = "Lluites i guanyes " + pirateEnergia + " d'energia." + " Força del jugador: " + forçaVaixell + " Força de la criatura: " + forçaPirata;
             return true;
         };
     }
@@ -517,7 +546,6 @@
     function lluitarBoss() {
         let forçaJugador = energia + menjar;
         let forçaBoss = 20;
-
         if (forçaJugador >= forçaBoss) {
             bossMort = true;
             // esborra el kraken del mapa
@@ -530,20 +558,7 @@
             gameObjects[vaixellFila][vaixellColumna] = VAIXELL;
             experience += 10;
             gameMessage = "Has derrotat el Kraken!";
-
             render();
-
-            // GIF després del render
-            let img = document.createElement("img");
-            img.src = "images/boss_mort.gif";
-            img.className = "cell";
-            img.style.left = (4 * MIDA) + "px";
-            img.style.top = (4 * MIDA) + "px";
-            img.style.width = "128px";
-            img.style.height = "128px";
-            img.style.zIndex = "20";
-            escena.appendChild(img);
-
         } else {
             gameMessage = "El Kraken t'ha destruït!";
             endGame();
@@ -552,7 +567,7 @@
 
     function trade() {
         //Quant menjar té la illa i el seu cost 
-        let islandMenjar = experience + energia;
+        let islandMenjar = Math.floor(Math.random() * 11) + 5;
         let cost = Math.ceil(Math.random() * islandMenjar);
         if (energia > 0) {
             menjar += islandMenjar;
@@ -565,7 +580,15 @@
             gameMessage = "No tens suficient energia"
         }
     }
+
+    //Les pantalles que es mostren quan el jugador mor o comença a jugar
     function startGame() {
+        let input = document.getElementById("usernameInput").value.trim();
+        if (input === "") {
+            alert("Escriu un nom!");
+            return;
+        }
+        username = input;
         document.getElementById("startScreen").style.display = "none";
         gameState = "playing";
         carregarNivell();
@@ -587,7 +610,7 @@
             gameMessage = "Has arribat a casa viu!";
         }
         if (gameObjects[vaixellFila][vaixellColumna] === MONSTRE) {
-            gameMessage = "El teu vaixell ha estat destruït per un MONSTRE marí!";
+            gameMessage = "T'ha matat una criatura!";
         }
         let finalMessage = gameMessage;
         if (energia <= 0) {
@@ -601,11 +624,58 @@
         }
         showGameOver(finalMessage);
 
-        //Remove the keyboard listener
+        //Treiem el keyboard listener perque no escolti les tecles que s'estan apretant
         window.removeEventListener("keydown", keydownHandler, false);
         let puntuacio = menjar + energia + experience;
         let total = Number(localStorage.getItem("total")) || 0;
         localStorage.setItem("total", total + puntuacio);
+        clearInterval(countdown);
+
+        if (nivell === 3 && mapa[vaixellFila][vaixellColumna] === CASA) {
+            guardarRanking();
+        }
+        mostrarRanking();
+    }
+
+    function guardarRanking() {
+        let ranking = JSON.parse(localStorage.getItem("ranking")) || [];
+
+        let jugador = ranking.find(j => j.nom === username);
+
+        if (jugador) {
+            // aquí volem MENYS temps = millor
+            if (time < jugador.temps) {
+                jugador.temps = time;
+            }
+        } else {
+            ranking.push({ nom: username, temps: time });
+        }
+
+        // ordenar de menor a major (millor temps primer)
+        ranking.sort((a, b) => a.temps - b.temps);
+
+        ranking = ranking.slice(0, 10);
+
+        localStorage.setItem("ranking", JSON.stringify(ranking));
+    }
+
+    function mostrarRanking() {
+        let ranking = JSON.parse(localStorage.getItem("ranking")) || [];
+        let tbody = document.querySelector("#rankingTable tbody");
+
+        tbody.innerHTML = "";
+
+        ranking.forEach((jugador, index) => {
+            let fila = document.createElement("tr");
+
+            fila.innerHTML = `
+            <td>${index + 1}</td>
+            <td>${jugador.nom}</td>
+            <td>${jugador.temps}s</td>
+        `;
+
+            tbody.appendChild(fila);
+        });
     }
 
     function render() {
@@ -635,6 +705,7 @@
                 switch (gameObjects[fila][columna]) {
                     case VAIXELL:
                         cell.src = imgVaixell;
+                        cell.style.zIndex = "9";
                         break;
                     case MONSTRE:
                         cell.src = imgMonstre;
@@ -674,7 +745,12 @@
         let força = menjar + energia
         output.innerHTML = gameMessage;
         //Mostra el menjar, energia i experiencia del jugador
-        output.innerHTML += "<br>⚡ Energia: " + energia + " | 🍊 Menjar: " + menjar + " | ⭐ Experiència: " + experience + " | 💪 Força: " + força;
+        if (nivell === 3) {
+            output.innerHTML += "<br>⚡ Energia: " + energia + " | 🍊 Menjar: " + menjar + " | ⭐ Experiència: " + experience + " | 💪 Força: " + força;
+        }
+        if (nivell !== 3) {
+            output.innerHTML += "<br>⚡ Energia: " + energia + " | 🍊 Menjar: " + menjar + " | ⭐ Experiència: " + experience;
+        }
         let puntuacio = menjar + energia + experience;
         if (puntuacio > highscore) {
             highscore = puntuacio;
@@ -688,10 +764,10 @@
 
         // últim nivell
         if (nivell > 3) {
-            showGameOver("Has completat tots els nivells!");
+            endGame();
+            showGameOver("Enhorabona, has completat tots els nivells!");
             return;
         }
-
         if (nivell === 2) {
             gameState = "paused";
             document.getElementById("levelScreen").style.display = "flex";
@@ -704,7 +780,7 @@
             return;
         }
 
-        gameMessage = "Has arribat a la casa! Passem al nivell " + nivell;
+        gameMessage = "Has arribat a la destinació! Passem al nivell " + nivell;
         carregarNivell();
     }
     function continuarNivell() {
@@ -722,8 +798,6 @@
 
     function carregarNivell() {
         if (nivell === 1) {
-            FILES = 4;
-            COLUMNES = 4;
             mapa = [
                 [0, 0, 0, 3],
                 [0, 2, 0, 0],
@@ -740,9 +814,9 @@
             imgPirata = "images/caterpillar_mines.png"
             document.body.style.backgroundImage = "url('images/stone.jpg')";
             document.body.style.backgroundColor = "";
+            gameMessage = "Camines per la cova"
 
             // vaixell
-            gameObjects[3][0] = VAIXELL;
             vaixellColumna = 0;
             gameObjects[3][0] = VAIXELL;
             vaixellFila = 3;
@@ -755,7 +829,7 @@
             FILES = 6;
             COLUMNES = 6;
             mapa = [
-                [0, 2, 0, 0, 0, 3],
+                [0, 2, 0, 3, 0, 0],
                 [0, 0, 0, 1, 0, 2],
                 [0, 0, 0, 0, 0, 0],
                 [0, 0, 0, 0, 1, 0],
@@ -771,6 +845,7 @@
             monstreFila = 0;
             monstreColumna = 1;
             gameObjects[0][1] = MONSTRE;
+            gameMessage = "Camines per la selva"
 
             imgFons = "images/background_forest.png";
             imgCasa = "images/ship2.png";
@@ -791,6 +866,7 @@
             mapa[2][2] = ISLAND;
             mapa[5][6] = ISLAND;
             mapa[7][3] = ISLAND;
+            gameMessage = "Navegues pel mar"
             imgFons = "images/background.png"
             imgCasa = "images/castle.png";
             imgMonstre = "images/monster.png";
@@ -821,6 +897,7 @@
         ];
         escena.style.backgroundImage = "url('" + imgFons + "')";
         render();
+        actualitzarInfoNivell();
     }
 
     function crearMatriu(files, columnes) {
@@ -833,6 +910,39 @@
             }
         }
         return matriu;
+    }
+    function actualitzarInfoNivell() {
+        let info = document.getElementById("infoNivell");
+
+        if (nivell === 1) {
+            info.innerHTML = `
+            <h3>Nivell 1: La Cova</h3>
+            <p>Explora la cova i arriba a la sortida.<br>
+            Tingues en compte que:<br>
+                🦇: et mata si et toca<br>
+                🐛: et fa perdre energia<br>
+                📦: et dona menjar</p>`
+        }
+
+        else if (nivell === 2) {
+            info.innerHTML = `
+            <h3>Nivell 2: La Selva</h3>
+            <p>Travessa la selva amb compte.<br>
+            Tingues en compte que:<br>
+                🐆: et mata si et toca<br>
+                🐍: et fa perdre energia<br>
+                🫐: et dona menjar</p>`
+            }
+
+        else if (nivell === 3) {
+            info.innerHTML = `
+            <h3>Nivell 3: El Mar</h3>
+            <p>Derrota el Kraken i arriba al castell.<br>
+            Tingues en compte que:<br>
+                🐙: boss final<br>
+                🦑: et mata<br>
+                🏴‍☠️🦜: et roben energia</p>`
+        }
     }
 
     ///COMPTADOR DE TEMPS
@@ -852,4 +962,8 @@
         const seconds = String(time % 60).padStart(2, '0');
         document.getElementById("timer").textContent = `${minutes}:${seconds}`;
     }
+
+    window.onload = function () {
+        mostrarRanking();
+    };
 </script>
