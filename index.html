@@ -28,8 +28,7 @@
         color: #ffb04f;
     }
 
-    html,
-    body {
+    html, body {
         height: 100%;
         margin: 0;
     }
@@ -57,9 +56,7 @@
         color: #ffb34f;
     }
 
-    #startScreen,
-    #gameOverScreen,
-    #levelScreen {
+    #startScreen, #gameOverScreen, #levelScreen {
         position: absolute;
         top: 0;
         left: 0;
@@ -144,26 +141,22 @@
 
 <body>
     <div id="startScreen">
-        <div
-            style="background-color: rgba(255, 164, 79, 0.5); height: 50%;align-items: center;padding: 15px; border-radius: 20px;width:55%">
+        <div style="background-color: rgba(255, 164, 79, 0.5); height: 50%;align-items: center;padding: 15px; border-radius: 20px;width:55%">
             <h1>Illes Salvatges</h1>
-            <p>Arriba a casa abans de quedar-te sense energia o menjar!
-            </p>
+            <p>Arriba a casa abans de quedar-te sense energia o menjar!</p>
             <input autofocus id="usernameInput" placeholder="Posa't un nom" /><br><br>
             <button onclick="startGame(); startTimer();">Jugar</button>
         </div>
     </div>
     <div id="gameOverScreen" style="display:none;">
-        <div
-            style="background-color: rgba(255, 164, 79, 0.5); height: 50%;align-items: center;padding: 15px; border-radius: 20px;width:55%">
+        <div style="background-color: rgba(255, 164, 79, 0.5); height: 50%;align-items: center;padding: 15px; border-radius: 20px;width:55%">
             <h1>Fi del joc!</h1>
             <p id="finalMessage"></p>
             <button onclick="location.reload()">Tornar a jugar</button>
         </div>
     </div>
     <div id="levelScreen" style="display:none;">
-        <div
-            style="background-color: rgba(255, 164, 79, 0.5); height: 50%;align-items: center;padding: 15px; border-radius: 20px;width:55%">
+        <div style="background-color: rgba(255, 164, 79, 0.5); height: 50%;align-items: center;padding: 15px; border-radius: 20px;width:55%">
             <h1>🎉 Has passat de nivell!</h1>
             <p>Vols continuar l'aventura?</p>
             <button onclick="continuarNivell()">Continuar</button>
@@ -185,8 +178,7 @@
         </tr>
         <tr>
             <td style="padding-left: 5px">
-                <table id="rankingTable"
-                    style="background-color: #f0fdff;border: 1px solid orange; border-collapse: collapse;width: 50%;">
+                <table id="rankingTable" style="background-color: #f0fdff;border: 1px solid orange; border-collapse: collapse;width: 50%;">
                     <thead>
                         <tr>
                             <th>#</th>
@@ -231,11 +223,11 @@
     </table>
 </body>
 <script>
-    let forçaVaixell = 0;
+    let forçaJugador = 0;
     let imgIsland = "images/island.png";
     let imgPirata = "images/hkpirate.png";
     let imgCasa = "images/home.png";
-    let imgVaixell = "images/player.png";
+    let imgJugador = "images/player.png";
     let imgMonstre = "images/monster.png";
     let imgFons = "images/background2.png";
     let piratesQueEsMouen = [];
@@ -246,9 +238,7 @@
     let highscore = Number(localStorage.getItem("highscore")) || 0;
     let nivell = 1;
     let username = "";
-
-    //listener d'events teclat
-    window.addEventListener("keydown", keydownHandler, false);
+    window.addEventListener("keydown", keydownHandler, false); //listener d'events teclat
 
     //mapa joc, separem el monstre i el jugador a gameObjects 
     let mapa =
@@ -260,7 +250,6 @@
             [0, 2, 0, 1, 0, 0],
             [0, 0, 0, 0, 0, 0]
         ];
-
     let gameObjects =
         [
             [0, 0, 0, 0, 0, 0],
@@ -275,7 +264,7 @@
     let ISLAND = 1;
     let PIRATA = 2;
     let CASA = 3;
-    let VAIXELL = 4;
+    let JUGADOR = 4;
     let MONSTRE = 5;
     let KRAKEN = 6;
     let bossMort = false;
@@ -307,70 +296,70 @@
         //gestiona moviments del jugador amb fletxes i WASD
         switch (event.keyCode) {
             case UP:
-                if (vaixellFila > 0) {
-                    gameObjects[vaixellFila][vaixellColumna] = 0; //// borrem el vaixell de la posició actual
-                    vaixellFila--; // el movem cap amunt
-                    if (gameObjects[vaixellFila][vaixellColumna] === MONSTRE) {
+                if (jugadorFila > 0) {
+                    gameObjects[jugadorFila][jugadorColumna] = 0; //// borrem el jugador de la posició actual
+                    jugadorFila--; // el movem cap amunt
+                    if (gameObjects[jugadorFila][jugadorColumna] === MONSTRE) {
                         endGame();
                         return;
                     }
-                    if (gameObjects[vaixellFila][vaixellColumna] === KRAKEN) {
+                    if (gameObjects[jugadorFila][jugadorColumna] === KRAKEN) {
                         lluitarBoss();
                         render();
                         return;
                     }
-                    gameObjects[vaixellFila][vaixellColumna] = VAIXELL; //coloquem a la nova posicio
+                    gameObjects[jugadorFila][jugadorColumna] = JUGADOR; //coloquem a la nova posicio
                     menjar--; // cada moviment resta menjar
                 }
                 break;
             case DOWN:
-                if (vaixellFila < FILES - 1) {
-                    gameObjects[vaixellFila][vaixellColumna] = 0;
-                    vaixellFila++; // movem cap a baix
-                    if (gameObjects[vaixellFila][vaixellColumna] === MONSTRE) {
+                if (jugadorFila < FILES - 1) {
+                    gameObjects[jugadorFila][jugadorColumna] = 0;
+                    jugadorFila++; // movem cap a baix
+                    if (gameObjects[jugadorFila][jugadorColumna] === MONSTRE) {
                         endGame();
                         return;
                     }
-                    if (gameObjects[vaixellFila][vaixellColumna] === KRAKEN) {
+                    if (gameObjects[jugadorFila][jugadorColumna] === KRAKEN) {
                         lluitarBoss();
                         render();
                         return;
                     }
-                    gameObjects[vaixellFila][vaixellColumna] = VAIXELL; // actualitzem posicio vaixell
+                    gameObjects[jugadorFila][jugadorColumna] = JUGADOR; // actualitzem posicio jugador
                     menjar--;
                 }
                 break;
             case LEFT:
-                if (vaixellColumna > 0) {
-                    gameObjects[vaixellFila][vaixellColumna] = 0;
-                    vaixellColumna--; //movem cap a la esquerra
-                    if (gameObjects[vaixellFila][vaixellColumna] === MONSTRE) {
+                if (jugadorColumna > 0) {
+                    gameObjects[jugadorFila][jugadorColumna] = 0;
+                    jugadorColumna--; //movem cap a la esquerra
+                    if (gameObjects[jugadorFila][jugadorColumna] === MONSTRE) {
                         endGame();
                         return;
                     }
-                    if (gameObjects[vaixellFila][vaixellColumna] === KRAKEN) {
+                    if (gameObjects[jugadorFila][jugadorColumna] === KRAKEN) {
                         lluitarBoss();
                         render();
                         return;
                     }
-                    gameObjects[vaixellFila][vaixellColumna] = VAIXELL; //actualizem
+                    gameObjects[jugadorFila][jugadorColumna] = JUGADOR; //actualizem
                     menjar--;
                 }
                 break;
             case RIGHT:
-                if (vaixellColumna < COLUMNES - 1) {
-                    gameObjects[vaixellFila][vaixellColumna] = 0;
-                    vaixellColumna++; //movem cap a la dreta
-                    if (gameObjects[vaixellFila][vaixellColumna] === MONSTRE) {
+                if (jugadorColumna < COLUMNES - 1) {
+                    gameObjects[jugadorFila][jugadorColumna] = 0;
+                    jugadorColumna++; //movem cap a la dreta
+                    if (gameObjects[jugadorFila][jugadorColumna] === MONSTRE) {
                         endGame();
                         return;
                     }
-                    if (gameObjects[vaixellFila][vaixellColumna] === KRAKEN) {
+                    if (gameObjects[jugadorFila][jugadorColumna] === KRAKEN) {
                         lluitarBoss();
                         render();
                         return;
                     }
-                    gameObjects[vaixellFila][vaixellColumna] = VAIXELL;
+                    gameObjects[jugadorFila][jugadorColumna] = JUGADOR;
                     menjar--;
                 }
                 break;
@@ -378,62 +367,62 @@
 
         switch (event.keyCode) {
             case W:
-                if (vaixellFila > 0) {
-                    gameObjects[vaixellFila][vaixellColumna] = 0;
-                    vaixellFila--; // movem cap a dalt
-                    if (vaixellFila === 4 && vaixellColumna === 4 || vaixellFila === 4 && vaixellColumna === 5 || vaixellFila === 5 && vaixellColumna === 4 || vaixellFila === 5 && vaixellColumna === 5) {
+                if (jugadorFila > 0) {
+                    gameObjects[jugadorFila][jugadorColumna] = 0;
+                    jugadorFila--; // movem cap a dalt
+                    if (jugadorFila === 4 && jugadorColumna === 4 || jugadorFila === 4 && jugadorColumna === 5 || jugadorFila === 5 && jugadorColumna === 4 || jugadorFila === 5 && jugadorColumna === 5) {
                         lluitarBoss();
                         return;
                     }
-                    gameObjects[vaixellFila][vaixellColumna] = VAIXELL;
+                    gameObjects[jugadorFila][jugadorColumna] = JUGADOR;
                     menjar--;
                 }
                 break;
             case S:
-                if (vaixellFila < FILES - 1) {
-                    gameObjects[vaixellFila][vaixellColumna] = 0;
-                    vaixellFila++; //movem cap a baix
-                    if (vaixellFila === 4 && vaixellColumna === 4 || vaixellFila === 4 && vaixellColumna === 5 || vaixellFila === 5 && vaixellColumna === 4 || vaixellFila === 5 && vaixellColumna === 5) {
+                if (jugadorFila < FILES - 1) {
+                    gameObjects[jugadorFila][jugadorColumna] = 0;
+                    jugadorFila++; //movem cap a baix
+                    if (jugadorFila === 4 && jugadorColumna === 4 || jugadorFila === 4 && jugadorColumna === 5 || jugadorFila === 5 && jugadorColumna === 4 || jugadorFila === 5 && jugadorColumna === 5) {
                         lluitarBoss();
                         return;
                     }
-                    gameObjects[vaixellFila][vaixellColumna] = VAIXELL;
+                    gameObjects[jugadorFila][jugadorColumna] = JUGADOR;
                     menjar--;
                 }
                 break;
             case A:
-                if (vaixellColumna > 0) {
-                    gameObjects[vaixellFila][vaixellColumna] = 0;
-                    vaixellColumna--; //esquerra
-                    if (vaixellFila === 4 && vaixellColumna === 4 || vaixellFila === 4 && vaixellColumna === 5 || vaixellFila === 5 && vaixellColumna === 4 || vaixellFila === 5 && vaixellColumna === 5) {
+                if (jugadorColumna > 0) {
+                    gameObjects[jugadorFila][jugadorColumna] = 0;
+                    jugadorColumna--; //esquerra
+                    if (jugadorFila === 4 && jugadorColumna === 4 || jugadorFila === 4 && jugadorColumna === 5 || jugadorFila === 5 && jugadorColumna === 4 || jugadorFila === 5 && jugadorColumna === 5) {
                         lluitarBoss();
                         return;
                     }
-                    gameObjects[vaixellFila][vaixellColumna] = VAIXELL;
+                    gameObjects[jugadorFila][jugadorColumna] = JUGADOR;
                     menjar--;
                 }
                 break;
             case D:
-                if (vaixellColumna < COLUMNES - 1) {
-                    gameObjects[vaixellFila][vaixellColumna] = 0;
-                    vaixellColumna++; //dreta
-                    if (vaixellFila === 4 && vaixellColumna === 4 || vaixellFila === 4 && vaixellColumna === 5 || vaixellFila === 5 && vaixellColumna === 4 || vaixellFila === 5 && vaixellColumna === 5) {
+                if (jugadorColumna < COLUMNES - 1) {
+                    gameObjects[jugadorFila][jugadorColumna] = 0;
+                    jugadorColumna++; //dreta
+                    if (jugadorFila === 4 && jugadorColumna === 4 || jugadorFila === 4 && jugadorColumna === 5 || jugadorFila === 5 && jugadorColumna === 4 || jugadorFila === 5 && jugadorColumna === 5) {
                         lluitarBoss();
                         return;
                     }
-                    gameObjects[vaixellFila][vaixellColumna] = VAIXELL;
+                    gameObjects[jugadorFila][jugadorColumna] = JUGADOR;
                     menjar--;
                 }
                 break;
         }
         
-        switch (mapa[vaixellFila][vaixellColumna]) {
+        switch (mapa[jugadorFila][jugadorColumna]) {
             case AIGUA:
                 gameMessage = "" 
                 break;
             case PIRATA:
                 lluitar();
-                mapa[vaixellFila][vaixellColumna] = AIGUA; // El pirata desapareix després de la lluita
+                mapa[jugadorFila][jugadorColumna] = AIGUA; // El pirata desapareix després de la lluita
                 break;
             case ISLAND:
                 trade();
@@ -451,7 +440,7 @@
         }
         moureMonstre();
         mourePirates();
-        if (gameObjects[vaixellFila][vaixellColumna] === MONSTRE) {
+        if (gameObjects[jugadorFila][jugadorColumna] === MONSTRE) {
             endGame();
         }
         if (menjar <= 0 || energia <= 0) {
@@ -508,7 +497,6 @@
     // Mou els pirates que es desplacen pel mapa de manera aleatòria, cada pirata es mou una casella
     function mourePirates() {
         for (let p of piratesQueEsMouen) { //Recorre cada pirata
-            // possibles direccions
             let moviments = []; //Guarda moviments possibles
             if (p.fila > 0) moviments.push({ df: -1, dc: 0 }); //pujar
             if (p.fila < FILES - 1) moviments.push({ df: 1, dc: 0 }); //baixar
@@ -517,28 +505,28 @@
             let move = moviments[Math.floor(Math.random() * moviments.length)]; //escull moviment aleatori i el mou
             p.fila += move.df;
             p.columna += move.dc;
-
-            if (p.fila === vaixellFila && p.columna === vaixellColumna) {
+            //si hi ha pirates a la posició del jugador lluitaran
+            if (p.fila === jugadorFila && p.columna === jugadorColumna) {
                 lluitar();
             }
         }
     }
 
     function lluitar() {
-        forçaVaixell = Math.ceil((menjar + energia) / 2); //arrodoneix el numero perque no doni una decimal
-        let forçaPirata = Math.ceil(Math.random() * forçaVaixell * 2)
-        if (forçaPirata > forçaVaixell) {
+        forçaJugador = Math.ceil((menjar + energia) / 2); //arrodoneix el numero perque no doni una decimal
+        let forçaPirata = Math.ceil(Math.random() * forçaJugador * 2)
+        if (forçaPirata > forçaJugador) {
             let stolenEnergia = Math.floor(Math.random() * 12) + 1;
             energia = Math.max(0, energia - stolenEnergia);
             experience += 1;
-            gameMessage = "Lluites i perds " + stolenEnergia + " d'energia." + " Força del jugador: " + forçaVaixell + " Força de la criatura: " + forçaPirata;
+            gameMessage = "Lluites i perds " + stolenEnergia + " d'energia." + " Força del jugador: " + forçaJugador + " Força de la criatura: " + forçaPirata;
             return false;
         }
         else {
             let pirateEnergia = Math.round(forçaPirata / 2);
             energia += pirateEnergia;
             experience += 2;
-            gameMessage = "Lluites i guanyes " + pirateEnergia + " d'energia." + " Força del jugador: " + forçaVaixell + " Força de la criatura: " + forçaPirata;
+            gameMessage = "Lluites i guanyes " + pirateEnergia + " d'energia." + " Força del jugador: " + forçaJugador + " Força de la criatura: " + forçaPirata;
             return true;
         };
     }
@@ -554,8 +542,8 @@
             gameObjects[5][4] = 0;
             gameObjects[5][5] = 0;
 
-            // posa el vaixell a la posició del combat
-            gameObjects[vaixellFila][vaixellColumna] = VAIXELL;
+            // posa el jugador a la posició del combat
+            gameObjects[jugadorFila][jugadorColumna] = JUGADOR;
             experience += 10;
             gameMessage = "Has derrotat el Kraken!";
             render();
@@ -600,7 +588,7 @@
     }
 
     function endGame() {
-        if (mapa[vaixellFila][vaixellColumna] === CASA) {
+        if (mapa[jugadorFila][jugadorColumna] === CASA) {
             //Calcula puntuació
             let puntuacio = menjar + energia + experience;
             let guardada = Number(localStorage.getItem("puntuacio")) || 0;
@@ -608,7 +596,7 @@
             localStorage.setItem("puntuacio", total);
             gameMessage = "Has arribat a casa viu!";
         }
-        if (gameObjects[vaixellFila][vaixellColumna] === MONSTRE) {
+        if (gameObjects[jugadorFila][jugadorColumna] === MONSTRE) {
             gameMessage = "T'ha matat una criatura!";
         }
         let finalMessage = gameMessage;
@@ -618,7 +606,7 @@
         else if (menjar <= 0) {
             finalMessage = "T'has quedat sense menjar!";
         }
-        else if (mapa[vaixellFila][vaixellColumna] === CASA) {
+        else if (mapa[jugadorFila][jugadorColumna] === CASA) {
             finalMessage = "Has arribat a casa amb èxit!";
         }
         showGameOver(finalMessage);
@@ -630,7 +618,7 @@
         localStorage.setItem("total", total + puntuacio);
         clearInterval(countdown); //para el timer
 
-        if (nivell === 3 && mapa[vaixellFila][vaixellColumna] === CASA) {
+        if (nivell === 3 && mapa[jugadorFila][jugadorColumna] === CASA) {
             guardarRanking();
         }
         mostrarRanking();
@@ -692,8 +680,8 @@
                         break;
                 }
                 switch (gameObjects[fila][columna]) {
-                    case VAIXELL:
-                        cell.src = imgVaixell;
+                    case JUGADOR:
+                        cell.src = imgJugador;
                         cell.style.zIndex = "9";
                         break;
                     case MONSTRE:
@@ -797,15 +785,13 @@
             document.body.style.backgroundColor = "";
             gameMessage = "Camines per la cova"
 
-            // vaixell
-            vaixellColumna = 0;
-            gameObjects[3][0] = VAIXELL; //posicio inicial del jugador
-            vaixellFila = 3;
+            jugadorColumna = 0;
+            gameObjects[3][0] = JUGADOR; //posicio inicial del jugador
+            jugadorFila = 3;
             monstreFila = 0;
             monstreColumna = 2;
             gameObjects[0][2] = MONSTRE;
         }
-
         else if (nivell === 2) {
             FILES = 6;
             COLUMNES = 6;
@@ -818,11 +804,11 @@
                 [0, 0, 0, 0, 0, 0]
             ];
             gameObjects = crearTaula(6, 6);
-            gameObjects[5][0] = VAIXELL;
+            gameObjects[5][0] = JUGADOR;
             escena.style.height = "384px";
             escena.style.width = "384px";
-            vaixellFila = 5;
-            vaixellColumna = 0;
+            jugadorFila = 5;
+            jugadorColumna = 0;
             monstreFila = 0;
             monstreColumna = 1;
             gameObjects[0][1] = MONSTRE;
@@ -835,7 +821,6 @@
             document.body.style.backgroundImage = "url('images/grass.png')";
             document.body.style.backgroundColor = "";
         }
-
         else if (nivell === 3) {
             FILES = 10;
             COLUMNES = 10;
@@ -852,19 +837,19 @@
             imgMonstre = "images/monster.png";
             imgIsland = "images/island.png"
             imgPirata = "images/hkpirate.png"
-            imgVaixell = "images/player_ship.png";
+            imgJugador = "images/player_ship.png";
             document.body.style.backgroundImage = "none";
             document.body.style.backgroundColor = "#ffebd6";
 
             gameObjects = crearTaula(10, 10);
-            gameObjects[9][0] = VAIXELL;
+            gameObjects[9][0] = JUGADOR;
             gameObjects[4][4] = KRAKEN;
             gameObjects[4][5] = KRAKEN;
             gameObjects[5][4] = KRAKEN;
             gameObjects[5][5] = KRAKEN;
 
-            vaixellFila = 9;
-            vaixellColumna = 0;
+            jugadorFila = 9;
+            jugadorColumna = 0;
             escena.style.height = "641px";
             escena.style.width = "641px";
             bossMort = false;
@@ -901,7 +886,6 @@
                 🐛: et fa perdre energia<br>
                 📦: et dona menjar</p>`
         }
-
         else if (nivell === 2) {
             info.innerHTML = `
             <h3>Nivell 2: La Selva</h3>
@@ -911,7 +895,6 @@
                 🐍: et fa perdre energia<br>
                 🫐: et dona menjar</p>`
             }
-
         else if (nivell === 3) {
             info.innerHTML = `
             <h3>Nivell 3: El Mar</h3>
@@ -944,5 +927,5 @@
     window.onload = function () {
         mostrarRanking();
     };
-    //localStorage.clear()
+    localStorage.clear()
     </script>
